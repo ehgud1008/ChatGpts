@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import path from 'path';
 
 //.env 설정파일 호출
 dotenv.config();
@@ -9,6 +10,9 @@ dotenv.config();
 //     .catch( (error) => { console.error(error)} );
     
 const app = express();
+const __dirname = path.resolve();
+
+app.use(express.static(path.join(__dirname, 'client/public')));
 
 app.use(express.json());
 const port = process.env.PORT || 3000;
