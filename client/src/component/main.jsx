@@ -4,7 +4,6 @@ const Main = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isSidebar, setIsSidebar] = useState(false);
-
   const [loadInterval, setLoadInterval] = useState(null);
 
   //프롬프트 textarea 세팅
@@ -13,7 +12,7 @@ const Main = () => {
     if(textarea && textarea.current){
       textarea.current.style.height = 'auto'; //height 초기화
       textarea.current.style.height = textarea.current.scrollHeight + 'px';
-      textarea.current.style.overflow = 'hidden';
+      textarea.current.style.maxHeight = '250px';
       textarea.current.style.resize = 'none';
     }
   };
@@ -24,11 +23,9 @@ const Main = () => {
     })
   }
 
-  const handleSendPrompt = () => {
-    if (newMessage.trim() !== '') {
-      setMessages([...messages, newMessage.trim()]);
-      setNewMessage('');
-    }
+  const handleSendPrompt = async (e) => {
+    e.preventDefault();
+    
   };
 
   const chatStript = (isAi, value, uniqueId) => {
@@ -79,12 +76,14 @@ const Main = () => {
                 </div>
             </div>
             {/* <!-- Footer --> */}
-            <div className="absolute right-0 bottom-0 w-10/12 bg-gray-100 p-4">
-                <div className="flex justify-between items-center">
-                    <textarea type="text" placeholder="Message ChatGPT..." rows={1} ref={textarea} onChange={handleResizeHeight} className="p-2 w-full border rounded-lg" />
-                    <button className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-lg"onSubmit={handleSendPrompt()}>Send</button>
-                </div>
-            </div>
+            <form onSubmit={handleSendPrompt()}>
+              <div className="absolute right-0 bottom-0 w-10/12 bg-gray-100 p-4">
+                  <div className="flex justify-between items-center">
+                      <textarea type="text" placeholder="Message ChatGPT..." rows={1} ref={textarea} onChange={handleResizeHeight} className="p-2 w-full border rounded-lg" />
+                      <button className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-lg">Send</button>
+                  </div>
+              </div>
+            </form>
         </div>
 
     </div>
