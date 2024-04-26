@@ -4,10 +4,12 @@ import user from '../images/user.svg';
 import PromptLoading from './common/PromptLoading'
 
 const Main = () => {
-  const [loadInterval, setLoadInterval] = useState(null);
+  const [loadingInterval, setLoadingInterval] = useState(null);
+
   const [isNonePrompt, setIsNonePrompt] = useState(false);
   const [stripe, setStripe] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
+  
   const messageEndRef = useRef(null);
 
   //프롬프트 textarea 세팅
@@ -40,17 +42,34 @@ const Main = () => {
       prompt: prompt
     }
 
-    // 메시지 상태 업데이트
-    setStripe(prevStripe => [...prevStripe, userMessage]);
+    // Add user message to the chat
+    setStripe([...stripe, userMessage]);
+    
+    let dots = '';
+    const intervalDot = setInterval(() => {
+        dots += '.';
+        if (dots.length > 4) dots = '.';
+        setLoadingText(`${dots}`);
+    }, 300);
 
-    
-    //ai 메시지(응답값)
-    const uniqueId = gernerateUniqueId(); 
-    const intervalId = startLoadingEffect(uniqueId); // Start loading effect
-    
+    // Start loading animation
+    startLoadingAnimation(intervalDot);
+
+    const uniqueId = generateUniqueId(); 
+    console.log(loadingInterval);
     try{
-
-      updateBotResponse(uniqueId, "Something went wrong");
+      setTimeout(() => {
+        stopLoadingAnimation(intervalDot);
+      }, 5000);
+      const botMessage = {
+          id: uniqueId,
+          isAi: true,
+          prompt: '봇 응답 메시지'
+      };
+      setStripe(stripe => [...stripe, botMessage]);
+      textarea.current.value = ''; // 입력 필드 초기화
+      textarea.current.style.height = 'auto'; // 높이 초기화
+    
     }catch(error){
       console.error(error);
     }
@@ -94,7 +113,7 @@ const Main = () => {
     `
   }
 
-  const gernerateUniqueId = () => {
+  const generateUniqueId = () => {
     const timestamp = Date.now();
     const random = Math.random();
     const hexaString = random.toString(16);
@@ -102,40 +121,18 @@ const Main = () => {
     return `id-${timestamp}-${hexaString}`;
   }
 
-  const startLoadingEffect = (uniqueId) => {
-      let dots = '';
-      const botMessage = {
-          id : uniqueId,
-          uniqueId : uniqueId,
-          isAi : true,
-          prompt : ''
-        }
-      
-      const intervalId = setInterval(() => {
-          dots += '.';
-          if (dots.length > 3) {
-              dots = '';
-          }
-          // Update only the specific bot message with loading dots
-          setStripe(messages => messages.map(msg =>{
-              console.log(msg);
-              msg.id !== uniqueId ? { ...msg, text: dots } : msg
-              console.log(messages);
-            }
-          ));
-          // 메시지 상태 업데이트
-          // setStripe(prevStripe => [...prevStripe, userMessage]);
-
-      }, 300);
-
-      return intervalId; // Return interval ID so it can be cleared later
+  // Start loading animation
+  const startLoadingAnimation = (interval) => {
+    console.log(interval);
+    setLoadingInterval(interval);
   };
-  
-  const updateBotResponse = (id, text) => {
-    setStripe(messages => messages.map(msg =>
-        msg.id === id ? { ...msg, text } : msg
-    ));
-  }; 
+  // Stop loading animation
+  const stopLoadingAnimation = (interval) => {
+    console.log(interval)
+    clearInterval(interval);
+    setLoadingText('');
+    setLoadingInterval(null);
+  };
 
   return (
     <div className="flex h-screen">
@@ -166,12 +163,22 @@ const Main = () => {
               {isNonePrompt ? 
                 <div>
                   {stripe.map(msg => (
+                    msg.isAi ? (
+                      <div key={msg.id}>
+                        <div className="profile flex">
+                              <img src={msg.type === 'bot' ? bot : user} alt={msg.type} /> Bot
+                          </div>
+                          <div className="text">{msg.prompt}</div>
+                        <div>{loadingText}</div>
+                      </div>
+                    ) : (
                       <div key={msg.id} className={`message ${msg.isAi ? 'bot' : 'user'}`}>
-                          <div className="profile">
-                              <img src={msg.type === 'bot' ? bot : user} alt={msg.type} />
+                          <div className="profile flex">
+                              <img src={msg.type === 'bot' ? bot : user} alt={msg.type} /> You
                           </div>
                           <div className="text">{msg.prompt}</div>
                       </div>
+                    )
                   ))}
                   <div ref={messageEndRef} />
                 </div>
