@@ -1,4 +1,4 @@
-import Main from './component/main'
+import Main from './components/main'
 
 function App() {
 
