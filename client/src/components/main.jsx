@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import bot from '../images/bot.svg';
 import user from '../images/user.svg';
-import PromptLoading from './common/PromptLoading'
 
 const Main = () => {
   const [loadingInterval, setLoadingInterval] = useState(null);
@@ -31,7 +30,7 @@ const Main = () => {
     })
   }
   const chatContainer = useRef();
-  const handleSendPrompt = () => {
+  const handleSendPrompt = async () => {
     setIsNonePrompt(true);  //프롬프트 첫 입력 여부
     
     //유저 메시지(프롬프트)
@@ -58,9 +57,34 @@ const Main = () => {
     const uniqueId = generateUniqueId(); 
     console.log(loadingInterval);
     try{
-      setTimeout(() => {
+      // setTimeout(() => {
+      //   stopLoadingAnimation(intervalDot);
+      // }, 5000);
+
+      //stopLoadingAnimation(intervalDot);
+      const option = {
+        method: 'POST',
+        headers: {
+          'Content-Type' : 'application/json',
+        },
+        body : JSON.stringify({
+          prompt: prompt
+        })
+      }
+      // const response = await fetch('http://localhost:3000/', option);
+      const response = await fetch('/server/responseBot', option);
+      
+      
+      if(response.ok){
         stopLoadingAnimation(intervalDot);
-      }, 5000);
+        const data = await response.json();
+
+      }else{
+        stopLoadingAnimation(intervalDot);
+        const error = await response.text();
+
+      }
+
       const botMessage = {
           id: uniqueId,
           isAi: true,
@@ -71,35 +95,8 @@ const Main = () => {
       textarea.current.style.height = 'auto'; // 높이 초기화
     
     }catch(error){
-      console.error(error);
+      console.error(error); 
     }
-    // const botResponseTest = 'ChatGpt의 대답입니다. chatgpts answer testtesttesttesttesttesttesttest';
-    // // const botResponseTest = '';
-    // setIsLoading(true);
-    // const botMessage = {
-    //   id : uniqueId,
-    //   uniqueId : uniqueId,
-    //   isAi : true,
-    //   prompt : chatStript(true, botResponseTest, uniqueId),
-    // }
-    
-    
-    // // 메시지 상태 업데이트
-    // setStripe(prevStripe => [...prevStripe, userMessage]);
-
-
-    // setIsLoading(false);
-    // textarea.current.value = ''; // 입력 필드 초기화
-    // textarea.current.style.height = 'auto'; // 높이 초기화
-    
-    // //1. 유저 메시지 줄 생성
-    // //2. 봇 메시지 줄 생성
-    // //3. ...로딩
-    // //4. api 응답
-    // //5. 로딩 종료 & 응답메시지 출력
-
-    // // 메시지 상태 업데이트
-    // setStripe(prevStripe => [...prevStripe, botMessage]);
   };
 
   const chatStript = (isAi, value, uniqueId) => {
@@ -166,7 +163,7 @@ const Main = () => {
                     msg.isAi ? (
                       <div key={msg.id}>
                         <div className="profile flex">
-                              <img src={msg.type === 'bot' ? bot : user} alt={msg.type} /> Bot
+                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> Bot
                           </div>
                           <div className="text">{msg.prompt}</div>
                         <div>{loadingText}</div>
@@ -174,7 +171,7 @@ const Main = () => {
                     ) : (
                       <div key={msg.id} className={`message ${msg.isAi ? 'bot' : 'user'}`}>
                           <div className="profile flex">
-                              <img src={msg.type === 'bot' ? bot : user} alt={msg.type} /> You
+                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> You
                           </div>
                           <div className="text">{msg.prompt}</div>
                       </div>
