@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const PromptLoading = () => {
-  const [loadingText, setLoadingText] = useState('');
+const Test = () => {
+    const [loadingText, setLoadingText] = useState('');
 
     const startLoadingEffect = () => {
       let count = 0;
@@ -35,4 +35,4 @@ const PromptLoading = () => {
     );
   };
 
-export default PromptLoading
+export default Test
