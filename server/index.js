@@ -41,15 +41,21 @@ app.post("/server/responseBot", async (req, res, next) => {
 
   try {
     const prompt = req.body.prompt;
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo", // specify the model
-      messages: [{
-        role: "user",
-        content: prompt
-      }]
+    // const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        prompt: `${prompt}`,
+        temperature: 1,
+        max_tokens: 3000,
+        top_p: 1,
+        frequency_penalty: 0.5,
+        presence_penalty: 0,
     });
     console.log(response);
-    res.status(200).json({ response: response.data.choices[0].message.content });
+    res.status(200).send({
+        bot : response.data.choices[0].text.trim() 
+    })
+    // res.status(200).json({ response: response.data.choices[0].message.content });
   } catch (error) {
     console.error("Error calling OpenAI: ", error);
     res.status(500).send({ error: error.message });
