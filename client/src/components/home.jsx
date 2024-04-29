@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import bot from '../images/bot.svg';
 import user from '../images/user.svg';
 
-const Main = () => {
+const Home = () => {
   const [loadingInterval, setLoadingInterval] = useState(null);
 
   const [isNonePrompt, setIsNonePrompt] = useState(false);
@@ -57,11 +57,6 @@ const Main = () => {
     const uniqueId = generateUniqueId(); 
     console.log(loadingInterval);
     try{
-      // setTimeout(() => {
-      //   stopLoadingAnimation(intervalDot);
-      // }, 5000);
-
-      //stopLoadingAnimation(intervalDot);
       const option = {
         method: 'POST',
         headers: {
@@ -73,22 +68,15 @@ const Main = () => {
       }
       // const response = await fetch('http://localhost:3000/', option);
       const response = await fetch('/server/responseBot', option);
-      
-      
-      if(response.ok){
-        stopLoadingAnimation(intervalDot);
-        const data = await response.json();
+      const data = await response.json();
 
-      }else{
-        stopLoadingAnimation(intervalDot);
-        const error = await response.text();
-
-      }
+      console.log(data);
+      stopLoadingAnimation(intervalDot);
 
       const botMessage = {
           id: uniqueId,
           isAi: true,
-          prompt: '봇 응답 메시지'
+          prompt: data.bot.content
       };
       setStripe(stripe => [...stripe, botMessage]);
       textarea.current.value = ''; // 입력 필드 초기화
@@ -150,7 +138,7 @@ const Main = () => {
 
         {/* <!-- Main content --> */}
         <div className="flex-1 p-10">
-            <select className='absolute right-10 top-5 border rounded-lg p-2'>
+            <select title='gpts' className='absolute right-10 top-5 border rounded-lg p-2'>
               <option value="">ChatGPT 4</option>
               <option value="">English Chat Bot</option>
             </select>
@@ -158,25 +146,25 @@ const Main = () => {
             <div className="text-md mt-16 pb-28">
               {/* 프롬프트 있냐? (로딩중이냐? 응 : 아니) : 아니 */}
               {isNonePrompt ? 
-                <div>
+                <div className='text-lg'>
                   {stripe.map(msg => (
                     msg.isAi ? (
-                      <div key={msg.id}>
-                        <div className="profile flex">
-                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> Bot
+                      <div key={msg.id} className='mt-5'>
+                        <div className="profile flex items-center">
+                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> <span className='ml-3 text-xl'>Bot</span>
                           </div>
-                          <div className="text">{msg.prompt}</div>
-                        <div>{loadingText}</div>
+                          <div className="whitespace-pre-wrap mt-2 ml-8">{msg.prompt.replace(/\+/g, '\n')}</div>
                       </div>
                     ) : (
-                      <div key={msg.id} className={`message ${msg.isAi ? 'bot' : 'user'}`}>
-                          <div className="profile flex">
-                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> You
+                      <div key={msg.id} className={`mt-5 message ${msg.isAi ? 'bot' : 'user'}`}>
+                          <div className="profile flex items-center">
+                              <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> <span className='ml-3 text-xl'>You</span>
                           </div>
-                          <div className="text">{msg.prompt}</div>
+                          <div className="whitespace-pre-wrap mt-2">{msg.prompt}</div>
                       </div>
                     )
                   ))}
+                  <div>{loadingText}</div>
                   <div ref={messageEndRef} />
                 </div>
                  : (
@@ -220,4 +208,4 @@ const Main = () => {
   );
 };
 
-export default Main;
+export default Home;
