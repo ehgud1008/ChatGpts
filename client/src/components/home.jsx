@@ -3,44 +3,43 @@ import bot from '../images/bot.svg';
 import user from '../images/user.svg';
 
 const Home = () => {
-  const [loadingInterval, setLoadingInterval] = useState(null);
-
-  const [isNonePrompt, setIsNonePrompt] = useState(false);
-  const [stripe, setStripe] = useState([]);
-  const [loadingText, setLoadingText] = useState('');
-  
-  const messageEndRef = useRef(null);
+  const [loadingInterval, setLoadingInterval] = useState(null); //로딩...interval 세팅
+  const [loadingText, setLoadingText] = useState('');           //.... 세팅
+  const [isNonePrompt, setIsNonePrompt] = useState(false);      //첫 프롬프트 여부
+  const [stripe, setStripe] = useState([]);                     //메시지 리스트
+  const [isInputText , setIsInputText] = useState(false);           //프롬프트 빈 값 여부
 
   //프롬프트 textarea 세팅
   const textarea = useRef();
-  const handleResizeHeight = (e) => {
-    if(textarea && textarea.current){
+  //프롬프트 textarea Onchange
+  const handleResizeHeight = () => {
+    if(textarea && textarea.current.value !== ''){
       textarea.current.style.height = 'auto'; //height 초기화
       textarea.current.style.height = textarea.current.scrollHeight + 'px';
       textarea.current.style.overflow = 'hidden';
       textarea.current.style.resize = 'none';
+
+      setIsInputText(true);
+    }else{
+      setIsInputText(false);
     }
   };
 
-  const loader = (element) => {
-    // element.textContent = 'gdgdgd';
-    // console.log(element);
-    setLoadInterval( () => {
-      
-    })
-  }
-  const chatContainer = useRef();
+  //Send버튼 클릭 함수
   const handleSendPrompt = async () => {
-    setIsNonePrompt(true);  //프롬프트 첫 입력 여부
-    
     //유저 메시지(프롬프트)
     const prompt = textarea.current.value;
+
+    if (!prompt) return;  // 입력 값이 없으면 함수 종료
+
+    //유저 stripe 세팅
     const userMessage = {
       id: Math.random().toString(36).substr(2, 9), // 랜덤 ID 생성
       isAi : false,
       prompt: prompt
     }
-
+    
+    setIsNonePrompt(true);  //프롬프트 첫 입력 여부
     // Add user message to the chat
     setStripe([...stripe, userMessage]);
     
@@ -66,7 +65,6 @@ const Home = () => {
           prompt: prompt
         })
       }
-      // const response = await fetch('http://localhost:3000/', option);
       const response = await fetch('/server/responseBot', option);
       const data = await response.json();
 
@@ -81,22 +79,11 @@ const Home = () => {
       setStripe(stripe => [...stripe, botMessage]);
       textarea.current.value = ''; // 입력 필드 초기화
       textarea.current.style.height = 'auto'; // 높이 초기화
-    
+      setIsInputText(false);  //프롬프트 상태 초기화
     }catch(error){
       console.error(error); 
     }
   };
-
-  const chatStript = (isAi, value, uniqueId) => {
-    return `
-      <div className="wrap ${isAi && 'ai'}">
-        <div className="chat">
-          <img src="${isAi ? bot : user}" alt="${isAi ? 'bot' : 'user' }"/>
-        </div>
-        <div className="message text-lg" id="${uniqueId}">${value}</div>
-      </div>
-    `
-  }
 
   const generateUniqueId = () => {
     const timestamp = Date.now();
@@ -120,7 +107,7 @@ const Home = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full min-h-screen">
         {/* <!-- Sidebar --> */}
         {/* {isSidebar && ( */}
           <div className="w-2/12 px-8 py-4 bg-white border-r">
@@ -160,12 +147,11 @@ const Home = () => {
                           <div className="profile flex items-center">
                               <img src={msg.isAi ? bot : user} alt={msg.isAi ? 'bot' : 'user'} /> <span className='ml-3 text-xl'>You</span>
                           </div>
-                          <div className="whitespace-pre-wrap mt-2">{msg.prompt}</div>
+                          <div className="whitespace-pre-wrap mt-2 ml-8">{msg.prompt}</div>
                       </div>
                     )
                   ))}
-                  <div>{loadingText}</div>
-                  <div ref={messageEndRef} />
+                  <div className='ml-8'>{loadingText}</div>
                 </div>
                  : (
                   <div>
@@ -187,21 +173,14 @@ const Home = () => {
                 </div>
               )}
             </div>
-            {/* <!-- Footer --> */}
-            {/* <div className="absolute right-0 bottom-0 w-10/12 bg-gray-100 p-4">
-                <div className="flex justify-between items-center">
-                    <textarea type="text" id="prompt" placeholder="Message ChatGPT..." rows={1} ref={textarea} onChange={handleResizeHeight} className="p-2 w-full border rounded-lg" />
-                    <button className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={handleSendPrompt}>Send</button>
-                </div>
-            </div> */}
-            <div className='flex'>
-              <div className="fixed right-0 bottom-0 w-10/12 bg-gray-100 p-4">
-                  <div className="flex justify-between items-center mx-auto" style={{ maxWidth: '90%' }}>
-                      <textarea type="text" id="prompt" placeholder="Message ChatGPT..." rows={1} ref={textarea} onChange={handleResizeHeight} className="p-2 w-full border rounded-lg" />
-                      <button className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={handleSendPrompt}>Send</button>
-                  </div>
+        </div>
+        <div className='flex'>
+          <div className="fixed right-0 bottom-0 w-10/12 bg-gray-100 p-4">
+              <div className="flex justify-between items-center mx-auto" style={{ maxWidth: '90%' }}>
+                  <textarea type="text" id="prompt" placeholder="Message ChatGPT..." rows={1} ref={textarea} onChange={handleResizeHeight} className="p-2 w-full border rounded-lg" />
+                  <button type="button" className={`ml-4 ${isInputText ? "bg-blue-500" : "cursor-not-allowed bg-gray-300" } text-white px-4 py-2 rounded-lg`} disabled={!isInputText} onClick={handleSendPrompt}>Send</button>
               </div>
-            </div>
+          </div>
         </div>
 
     </div>
