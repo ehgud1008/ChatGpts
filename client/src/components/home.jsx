@@ -7,12 +7,11 @@ const Home = () => {
   const [loadingText, setLoadingText] = useState('');           //.... 세팅
   const [isNonePrompt, setIsNonePrompt] = useState(false);      //첫 프롬프트 여부
   const [stripe, setStripe] = useState([]);                     //메시지 리스트
-  const [isInputText , setIsInputText] = useState(false);           //프롬프트 빈 값 여부
+  const [isInputText , setIsInputText] = useState(false);       //프롬프트 빈 값 여부(send 버튼 활성화 여부)
 
   //프롬프트 textarea 세팅
   const textarea = useRef();
-  //프롬프트 textarea Onchange
-  const handleResizeHeight = () => {
+  const handleResizeHeight = () => {  //프롬프트 textarea Onchange
     if(textarea && textarea.current.value !== ''){
       textarea.current.style.height = 'auto'; //height 초기화
       textarea.current.style.height = textarea.current.scrollHeight + 'px';
@@ -40,9 +39,10 @@ const Home = () => {
     }
     
     setIsNonePrompt(true);  //프롬프트 첫 입력 여부
-    // Add user message to the chat
+    //유저메시지 1줄 추가
     setStripe([...stripe, userMessage]);
     
+    //응답메시지 로딩 dot
     let dots = '';
     const intervalDot = setInterval(() => {
         dots += '.';
@@ -50,11 +50,13 @@ const Home = () => {
         setLoadingText(`${dots}`);
     }, 300);
 
-    // Start loading animation
+    //loading animation 시작
     startLoadingAnimation(intervalDot);
 
+    //응답메시지 고유값(uniqueId) 세팅
     const uniqueId = generateUniqueId(); 
-    console.log(loadingInterval);
+
+    //openai API 통신
     try{
       const option = {
         method: 'POST',
@@ -68,15 +70,17 @@ const Home = () => {
       const response = await fetch('/server/responseBot', option);
       const data = await response.json();
 
-      console.log(data);
+      //loading animation 중지
       stopLoadingAnimation(intervalDot);
 
+      //응답받은 bot 메시지 출력
       const botMessage = {
           id: uniqueId,
           isAi: true,
           prompt: data.bot.content
       };
       setStripe(stripe => [...stripe, botMessage]);
+
       textarea.current.value = ''; // 입력 필드 초기화
       textarea.current.style.height = 'auto'; // 높이 초기화
       setIsInputText(false);  //프롬프트 상태 초기화
@@ -85,7 +89,7 @@ const Home = () => {
     }
   };
 
-  const generateUniqueId = () => {
+  const generateUniqueId = () => {  //uniqueId 생성
     const timestamp = Date.now();
     const random = Math.random();
     const hexaString = random.toString(16);

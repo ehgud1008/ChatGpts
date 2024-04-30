@@ -44,12 +44,14 @@ app.post("/server/responseBot", async (req, res, next) => {
     // const response = await openai.createChatCompletion({
     const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        temperature: 1,
-        max_tokens: 3000,
+        //0~무한대, 창의성이 필요한 경우 높은 온도로 설정하여 사용, default-0.7
+        //챗봇이라면 temperature은 낮추는걸 추천
+        temperature: 1, 
+        max_tokens: 2000, //default: 256, max: 2048
         top_p: 1,
         frequency_penalty: 0.5,
         presence_penalty: 0,
-        messages: [ {"role" : "system", "content": ""} ],
+        messages: [ {"role" : "system", "content": "넌 초등학교 선생님이야. "} ],
         messages: [ {"role": "user", "content" : prompt}]
         //role : 'system', 'assistant', 'user', 'function'
         //
