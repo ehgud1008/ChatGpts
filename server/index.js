@@ -37,24 +37,34 @@ app.get("/", (req, res, next) => {
 });
 
 app.post("/server/responseBot", async (req, res, next) => {
-  console.log("asdfadsf");
-
   try {
     const prompt = req.body.prompt;
-    // const response = await openai.createChatCompletion({
+    // const response = await openai.createChatCompletion({ //openai v4에서는 이 방식 사용 안 함.
     const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        //0~무한대, 창의성이 필요한 경우 높은 온도로 설정하여 사용, default-0.7
+        // model: "gpt-3.5-turbo",
+        model: "gpt-4-turbo",
+        //temperature : 0~무한대, 창의성이 필요한 경우 높은 온도로 설정하여 사용, default-0.7
         //챗봇이라면 temperature은 낮추는걸 추천
         temperature: 1, 
         max_tokens: 2000, //default: 256, max: 2048
         top_p: 1,
-        frequency_penalty: 0.5,
+        //frequency_penalty : 생성된 텍스트에서 자주 등장하는 단어를 억제함. 
+        //1에 가까울 수록 흔히 사용되는 단어를 덜 사용하고, 창의적이거나 독특한 단어 사용.
+        frequency_penalty: 0,
+        //presence_penalty : 동일 단언아 표현을 반복하는 것을 피함. 
         presence_penalty: 0,
-        messages: [ {"role" : "system", "content": "넌 초등학교 선생님이야. "} ],
-        messages: [ {"role": "user", "content" : prompt}]
+        messages: [ {"role" : "system", "content": "Please tell me only Korean."},
+                    // {"role": "assistant", "content": ""},
+                    {"role": "user", "content" : prompt}
+                  ],
         //role : 'system', 'assistant', 'user', 'function'
         //
+
+        // {"messages": 
+        // [{"role": "system", "content": "Marv is a factual chatbot that is also sarcastic."}, 
+        // {"role": "user", "content": "What's the capital of France?"}, 
+        // {"role": "assistant", "content": "Paris, as if everyone doesn't know that already."}]}
+
     });
     console.log(response);
     console.log(response.choices[0].message);
