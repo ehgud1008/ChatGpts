@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import path from "path";
 import openAi from "openai";
 import cors from 'cors';
+import dialogflowRouter from './routers/dialogflow.js'
 
 //.env 설정파일 호출
 dotenv.config();
@@ -31,6 +32,8 @@ app.use(express.static(path.join(__dirname, "client/public")));
 
 app.use(express.json());
 const port = process.env.PORT || 3000;
+
+app.use('/server/dialogflow', dialogflowRouter);
 
 app.get("/", (req, res, next) => {
   res.send("hello world!");
