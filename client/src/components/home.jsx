@@ -47,7 +47,7 @@ const Home = () => {
 
     //유저 conversation데이터 > 리덕스 스토어에 넣고 저장
     dispatch(saveMessage(conversation));
-    console.log("User : " + conversation);
+    console.log("User : " + JSON.stringify(conversation));
 
     //2. 챗봇이 보낸 메시지 처리
     try {
@@ -70,7 +70,7 @@ const Home = () => {
 
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
-      console.log("Bot : " + conversation);
+      console.log("Bot : " + JSON.stringify(conversation));
     } catch (error) {
       let conversation = {
         who: 'bot',
@@ -82,7 +82,7 @@ const Home = () => {
       }
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
-      console.log(conversation);
+      console.log("error : " + JSON.stringify(conversation));
     }
   }
 
@@ -108,7 +108,7 @@ const Home = () => {
       }
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
-      console.log(conversation);
+      console.log("bot event : " + JSON.stringify(conversation));
     } catch (error) {
       let conversation = {
         who: 'bot',
@@ -120,7 +120,7 @@ const Home = () => {
       }
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
-      console.log(conversation);
+      console.log("error : " + JSON.stringify(conversation));
     }
   }
 
