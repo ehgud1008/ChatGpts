@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import bot from '../images/bot.svg';
 import user from '../images/user.svg';
-
+import { useDispatch } from 'react-redux'
+import {saveMessage} from '../_actions/message_actions';
 const Home = () => {
   const [loadingInterval, setLoadingInterval] = useState(null); //로딩...interval 세팅
   const [loadingText, setLoadingText] = useState('');           //.... 세팅
@@ -13,6 +14,11 @@ const Home = () => {
   //프롬프트 textarea 세팅
   const textarea = useRef();
   const botType = useRef();
+
+  const dispatch = useDispatch();
+  useEffect( () => {
+    eventQuery('WelcomeToChatBot');
+  },[]);
 
   const handleResizeHeight = () => {  //프롬프트 textarea Onchange
     if(textarea && textarea.current.value !== ''){
@@ -27,8 +33,8 @@ const Home = () => {
     }
   };
 
-  //Send버튼 클릭 함수
-  const handleSendPrompt = async () => {
+  //텍스트쿼리 전송 함수 
+  const textQuery = async (text) => {
     //1. 보낸 메시지 관리
     let conversation = {
       who : 'user',
@@ -39,13 +45,103 @@ const Home = () => {
       }
     }
 
+    //유저 conversation데이터 > 리덕스 스토어에 넣고 저장
+    dispatch(saveMessage(conversation));
+    console.log("User : " + conversation);
+
     //2. 챗봇이 보낸 메시지 처리
+    try {
+      const textQuertOption = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text }), // JSON 문자열로 변환
+      }
+      const response = await fetch('/server/dialogflow/textQuery', textQuertOption);
+      const data = await response.json();
+
+      const content = data.fulfillmentMessages[0];
+
+      conversation = {
+        who: 'bot',
+        content : content
+      }
+
+      //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
+      dispatch(saveMessage(conversation));
+      console.log("Bot : " + conversation);
+    } catch (error) {
+      let conversation = {
+        who: 'bot',
+        content : {
+          text: {
+            text: '문제가 발생했습니다.'
+          }
+        }
+      }
+      //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
+      dispatch(saveMessage(conversation));
+      console.log(conversation);
+    }
+  }
+
+  //텍스트쿼리 전송 함수 
+  const eventQuery = async (event) => {
+    //2. 챗봇이 보낸 메시지 처리
+    try {
+      const eventQuertOption = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ event: event }), // JSON 문자열로 변환
+      }
+      const response = await fetch('/server/dialogflow/eventQuery', eventQuertOption);
+      const data = await response.json();
+
+      const content = data.fulfillmentMessages[0];
+
+      let conversation = {
+        who: 'bot',
+        content : content
+      }
+      //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
+      dispatch(saveMessage(conversation));
+      console.log(conversation);
+    } catch (error) {
+      let conversation = {
+        who: 'bot',
+        content : {
+          text: {
+            text: '문제가 발생했습니다.'
+          }
+        }
+      }
+      //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
+      dispatch(saveMessage(conversation));
+      console.log(conversation);
+    }
+  }
+
+
+  /** Send버튼 클릭 함수 */
+  const handleSendPrompt = (e) => {
+    e.preventDefault();
+    let prompt = textarea.current.value;
+    
+    textQuery(prompt);
   };
 
   const handleSubmitStop = () => {
     
   }
 
+
+  /**
+   * 
+   * @returns 
+   */
   const generateUniqueId = () => {  //uniqueId 생성
     const timestamp = Date.now();
     const random = Math.random();

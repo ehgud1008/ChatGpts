@@ -14,10 +14,7 @@ const sessionPath = sessionClient.sessionPath(projectId, sessionId);
     
 //텍스트 쿼리 라우터
 router.post('/textQuery', async (req, res) => {
-
-    //1. 사용자가 프롬프트를 전송하고, dialogflw API에 전달.
-    
-    // The text query request.
+    //사용자가 프롬프트를 전송하고, dialogflw API에 전달.
     const request = {
         session: sessionPath,
         queryInput: {
@@ -29,8 +26,7 @@ router.post('/textQuery', async (req, res) => {
             },
         },
     };
-    // Send request and log result
-    console.log(request)
+
     const responses = await sessionClient.detectIntent(request);
     console.log('Detected intent');
     const result = responses[0].queryResult;
