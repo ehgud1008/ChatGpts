@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import bot from '../images/bot.svg';
 import user from '../images/user.svg';
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {saveMessage} from '../_actions/message_actions';
+import Message from './Message';
+
 const Home = () => {
   const [loadingInterval, setLoadingInterval] = useState(null); //로딩...interval 세팅
   const [loadingText, setLoadingText] = useState('');           //.... 세팅
@@ -16,6 +18,8 @@ const Home = () => {
   const botType = useRef();
 
   const dispatch = useDispatch();
+  const messagesFromRedux = useSelector(state => state.message.messages);
+
   useEffect( () => {
     eventQuery('WelcomeToChatBot');
   },[]);
@@ -124,7 +128,6 @@ const Home = () => {
     }
   }
 
-
   /** Send버튼 클릭 함수 */
   const handleSendPrompt = (e) => {
     e.preventDefault();
@@ -133,10 +136,23 @@ const Home = () => {
     textQuery(prompt);
   };
 
+  const renderMessage = (returnedMessage) => {
+    if(returnedMessage){
+      return returnedMessage.map( (message, i) => {
+        return renderOneMessage(message, i);
+      })
+    }else{
+      return null;
+    }
+  }
+
+  const renderOneMessage = (message, i) => {
+    console.log("message!!! = " + JSON.stringify(message));
+    return <Message key={i} who={message.who} text={message.text} />
+  }
   const handleSubmitStop = () => {
     
   }
-
 
   /**
    * 
@@ -177,12 +193,6 @@ const Home = () => {
         }
     }, 20);
   }
-  
-
-  useEffect( () => {
-    // setIsProceeding(true);  //첫화면 버튼 ui세팅
-  });
-
 
   return (
     <div className="flex h-full min-h-screen">
@@ -209,6 +219,7 @@ const Home = () => {
             </select>
             
             <div className="text-md mt-16 pb-28">
+              {renderMessage( messagesFromRedux )}
                 {/* <div className='text-lg'>
                       <div className='mt-5'>
                         <div className="profile flex items-center">
