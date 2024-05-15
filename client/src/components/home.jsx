@@ -148,7 +148,7 @@ const Home = () => {
 
   const renderOneMessage = (message, i) => {
     console.log("message!!! = " + JSON.stringify(message));
-    return <Message key={i} who={message.who} text={message.text} />
+    return <Message key={i} who={message.who} text={message.content.text.text} />
   }
   const handleSubmitStop = () => {
     
