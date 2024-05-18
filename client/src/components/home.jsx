@@ -37,6 +37,8 @@ const Home = () => {
     }
   };
 
+  //openai로 ai끼리 대화 해볼까??
+
   //텍스트쿼리 전송 함수 
   const textQuery = async (text) => {
     //1. 보낸 메시지 관리
@@ -71,6 +73,14 @@ const Home = () => {
         who: 'bot',
         content : content
       }
+
+      // for( let content of response.data.fulfillmentMessages){
+      //   conversation = {
+      //     who: 'bot',
+      //     content : content
+      //   }
+      //   dispatch(saveMessage(conversation));
+      // }
 
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
@@ -112,6 +122,14 @@ const Home = () => {
       }
       //봇 conversation데이터 > 리덕스 스토어에 넣고 저장
       dispatch(saveMessage(conversation));
+
+      // for( let content of response.data.fulfillmentMessages){
+      //   conversation = {
+      //     who: 'bot',
+      //     content : content
+      //   }
+      //   dispatch(saveMessage(conversation));
+      // }
       console.log("bot event : " + JSON.stringify(conversation));
     } catch (error) {
       let conversation = {
@@ -148,7 +166,13 @@ const Home = () => {
 
   const renderOneMessage = (message, i) => {
     console.log("message!!! = " + JSON.stringify(message));
-    return <Message key={i} who={message.who} text={message.content.text.text} />
+
+    if(message.content && message.content.text && message.content.text.text){
+      return <Message key={i} who={message.who} text={message.content.text.text} />
+    }else if(message.content && message.content.payload.fields.card){
+      return <Message key={i} who={message.who} text={message.content.text.text} /> 
+    }
+
   }
   const handleSubmitStop = () => {
     
@@ -220,6 +244,7 @@ const Home = () => {
             
             <div className="text-md mt-16 pb-28">
               {renderMessage( messagesFromRedux )}
+              
                 {/* <div className='text-lg'>
                       <div className='mt-5'>
                         <div className="profile flex items-center">
